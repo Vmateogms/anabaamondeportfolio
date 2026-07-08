@@ -1,43 +1,119 @@
-# Astro Starter Kit: Minimal
+# ABP - PORTFOLIO
 
-```sh
-npm create astro@latest -- --template minimal
+[🇪🇸 Español](#español) | [🇬🇧 English](#english) | [🇩🇪 Deutsch](#deutsch)
+
+Live site: [anabaamondeperez.com](https://anabaamondeperez.com)
+
+
+---
+
+#Español
+
+### 🚀 Sobre el proyecto
+
+Portfolio fotografico persona constuido con **Astro**🚀 en modo **SSR (Server Side Rendering)**. El contenido (Biografía, fotos, proyectos) se sirve dináminacente desde un backend **PocketBase** configurable mediante un archivo .env, 
+esto significa que al actualizar fotos o textos desde el panel de administración, los cambios se reflejan  en la web al instante, sin necesidad de recompilar ni desplegar nada.
+
+### 🛠️ Stack técnico
+
+- **[Astro](https://astro.build/)** (modo `server`, adapter `@astrojs/node`)
+- **[PocketBase](https://pocketbase.io/)** como backend/CMS (base de datos + API + panel admin)
+- **Node.js** como runtime del servidor
+- **PM2** para mantener los procesos vivos en producción
+- **Nginx** como proxy inverso
+- **Let's Encrypt / Certbot** para HTTPS
+
+
+### 📁 Estructura del proyecto
+
+ 
 ```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
 ├── src/
-│   └── pages/
-│       └── index.astro
+│   ├── pages/
+│   │   └── [lang]/
+│   │   │ 
+│   │   └── index.astro        
+│   ├── components/
+│   └── layouts/
+├── public/
+├── astro.config.mjs
+├── .env                    
 └── package.json
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### Variables de entorno 
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Crea un archivo ` .env` en la raiz del proyecto
 
-Any static assets, like images, can be placed in the `public/` directory.
+```
+PUBLIC_POCKETBASE_URL=https://tupocketbase.com
+```
 
-## 🧞 Commands
+### 🚀 Desarrollo local
+ 
+```bash
+npm install
+npm run dev
+```
+La web quedará disponible en `http://localhost:4321`.
 
-All commands are run from the root of the project, from a terminal:
+### 📄 Licencia
+ 
+Todos los derechos reservados © Ana Baamonde. Este código es de uso privado salvo indicación contraria.
+ 
+---
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## English
+ 
+###  About the project
+ 
+Personal photography portfolio built with **Astro** 🚀 in **SSR (Server-Side Rendering)** mode. Content (bio, photos, projects) is served dynamically from a **PocketBase** backend , meaning that whenever photos or text are updated from the admin panel, changes appear on the live site instantly, with no rebuild or redeploy required.
+ 
+### 🛠️ Tech stack
+ 
+- **[Astro](https://astro.build/)** (`server` output mode, `@astrojs/node` adapter)
+- **[PocketBase](https://pocketbase.io/)** as backend/CMS (database + API + admin panel)
+- **Node.js** as the server runtime
+- **PM2** to keep production processes alive
+- **Nginx** as reverse proxy
+- **Let's Encrypt / Certbot** for HTTPS
+### 📁 Project structure
+ 
+```
+├── src/
+│   ├── pages/
+│   │   └── [lang]/        
+│   ├── components/
+│   └── layouts/
+├── public/
+├── astro.config.mjs
+├── .env                    
+└── package.json
+```
+ 
+### ⚙️ Environment variables
+ 
+Create a `.env` file in the project root:
+ 
+```
+PUBLIC_POCKETBASE_URL=https://yourpocketbase.com
+```
+ 
+### 🚀 Local development
+ 
+```bash
+npm install
+npm run dev
+```
+The site will be available at `http://localhost:4321`.
+ 
+### 📦 Build & production deployment
+ 
+> 💡 Since the site uses SSR, this process only needs to be repeated when the **code** changes. Content updates (photos, text) from PocketBase appear instantly, no redeploy needed.
+ 
+### 📄 License
+ 
+All rights reserved © Ana Baamonde. This code is for private use unless otherwise stated.
+ 
+---
