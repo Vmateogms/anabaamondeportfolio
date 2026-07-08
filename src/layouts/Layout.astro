@@ -1,0 +1,35 @@
+---
+// src/layouts/Layout.astro
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <style is:global>
+        /* Aquí tus estilos globales */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap');
+
+        :root {
+            --color-fondo: #f4f4f4;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--color-fondo);
+            font-family: 'Inter', sans-serif;
+            color: #000;
+        }
+        
+        /* Estilos para textos, etc. */
+        h1 { font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        p { font-weight: 300; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <slot />
+</body>
+</html>

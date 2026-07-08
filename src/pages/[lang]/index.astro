@@ -1,0 +1,270 @@
+---
+
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+const {lang} = Astro.params;
+const currentPath = Astro.url.pathname;
+
+
+const pathEmpty = currentPath.replace(`/${lang}`, '') ||'/';
+const linkES = getRelativeLocaleUrl('es', pathEmpty);
+const linkEN = getRelativeLocaleUrl('en', pathEmpty);
+
+const elementosMenu = [
+    { titulo: lang === 'es' ? "SOBRE MÍ" : "ABOUT ME", href: `/${lang}/sobre-mi` },
+    { titulo: lang === 'es' ? "FOTOGRAFÍA ANALÓGICA" : "ANALOG PHOTO", href: `/${lang}/analogica` },
+    { titulo: lang === 'es' ? "FOTOGRAFÍA DIGITAL" : "DIGITAL PHOTO", href: `/${lang}/digital` },
+    { titulo: lang === 'es' ? "PROYECTOS PERSONALES" : "PERSONAL PROJECTS", href: `/${lang}/proyectos` },
+    { titulo: lang === 'es' ? "CONTACTO" : "CONTACT", href: `/${lang}/contacto` },
+];
+---
+
+<html lang={lang}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Baamonde - Portfolio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap');
+
+        :root {
+            --color-fondo: #f4f4f4;
+            --alto-carrete: 250px;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--color-fondo);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .idiomas a {
+            text-decoration: none;
+            color: #999;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        .idiomas a:hover { color: #000; }
+        
+        .idiomas a.activo {
+            color: #000;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .espaciador-scroll {
+            height: 500vh;
+            width: 100%;
+        }
+
+        .visor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 20vh;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .cabecera {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+        .cabecera div { pointer-events: auto; }
+
+        .pista-carrete {
+            display: flex;
+            align-items: center;
+            height: var(--alto-carrete);
+            background-image: url('/carrete.jpeg');
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+            background-position: left center;
+            width: max-content;
+            padding-left: 15vw;
+            padding-right: 50vw;
+            will-change: transform;
+        }
+
+        .estacion-menu {
+            position: relative;
+            height: 100%;
+            width: 45vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .linea-colgante {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 260px;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            transform-origin: top;
+            transform: scaleY(0);
+        }
+
+        .linea-colgante::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: -3px; left: -3px;
+        }
+
+        .enlace-menu {
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #000;
+            text-decoration: none;
+            margin-bottom: -40px;
+            transition: opacity 0.3s;
+        }
+
+        .enlace-menu:hover {
+            opacity: 0.6;
+        }
+
+        .titulo-fondo {
+            position: fixed;
+            bottom: 5vh; left: 5vw;
+            font-size: 10vw;
+            font-weight: 900;
+            line-height: 0.9;
+            z-index: -1;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* Móviles */
+        @media (max-width: 768px) {
+            :root {
+                --alto-carrete: 160px;
+            }
+
+            .visor {
+                padding-top: 30vh;
+            }
+
+            .estacion-menu {
+                width: 85vw;
+            }
+
+            .linea-colgante {
+                height: 150px;
+            }
+
+            .enlace-menu {
+                font-size: 16px;
+                margin-bottom: -50px;
+                white-space: normal;
+                text-align: center;
+                width: 200px;
+                line-height: 1.2;
+            }
+
+            .titulo-fondo {
+                font-size: 15vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="espaciador-scroll"></div>
+
+    <div class="titulo-fondo">ANA<br>BAAMONDE</div>
+
+    <div class="cabecera">
+        <div>@klluevabacardi</div>
+        <div class="idiomas">
+            <a href={linkES} class={lang === 'es' ? 'activo' : ''}>ES</a>
+            <span> | </span>
+            <a href={linkEN} class={lang === 'en' ? 'activo' : ''}>EN</a>
+        </div>
+    </div>
+
+    <div class="visor">
+        <div class="pista-carrete">
+            {elementosMenu.map((item) => (
+                <div class="estacion-menu">
+                    <div class="linea-colgante">
+                        <a href={item.href} class="enlace-menu">{item.titulo}</a>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+
+    <script>
+        import { gsap } from "gsap";
+        import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const pista = document.querySelector('.pista-carrete') as HTMLElement;
+        const estaciones = gsap.utils.toArray('.estacion-menu');
+
+        if (pista) {
+            function obtenerDesplazamiento() {
+                let anchoPista = pista.scrollWidth;
+                return -(anchoPista - window.innerWidth);
+            }
+
+            let animacionCarrete = gsap.to(pista, {
+                x: obtenerDesplazamiento,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".espaciador-scroll",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            });
+
+            estaciones.forEach((estacion: any) => {
+                const linea = estacion.querySelector('.linea-colgante');
+
+                gsap.to(linea, {
+                    scaleY: 1,
+                    opacity: 1,
+                    ease: "power1.out",
+                    scrollTrigger: {
+                        trigger: estacion,
+                        containerAnimation: animacionCarrete,
+                        start: "left 100%",
+                        end: "center 60%",
+                        scrub: 1
+                    }
+                });
+            });
+        }
+    </script>
+
+</body>
+</html>
