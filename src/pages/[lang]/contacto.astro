@@ -1,7 +1,221 @@
 ---
 
 import PocketBase from 'pocketbase';
-
+const {lang} = Astro.params;
+if (lang !== 'es' && lang !== 'en') {
+    return Astro.redirect('/es/');
+}
 const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
 
+let sent = false;
+let error = false;
+
+if (Astro.request.method === 'POST') {
+
+    try {
+        const formData = await Astro.request.formData();
+        const nombre = formData.get('nombre');
+        const email = formData.get('email');
+        const mensaje = formData.get('mensaje');
+
+        await pb.collection('mensajes').create({nombre, email, mensaje});
+        sent = true;
+    } catch (e) {
+        error = true;
+    }
+
+};
+
+const currentPath = Astro.url.pathname;
+const linkES = currentPath.replace(`/${lang}`, '/es');
+const linkEN = currentPath.replace(`/${lang}`, '/en');
+
+const textos = {
+    es: {
+        titulo: 'Contacto', nombre: 'Nombre', email: 'Email', mensaje: 'Mensaje',
+        enviar: 'Enviar', exito: 'Gracias, tu mensaje se ha enviado correctamente.',
+        error: 'Algo salió mal. Inténtalo de nuevo.', volver: '<- Volver',
+    },
+    en: {
+        titulo: 'Contact', nombre: 'Name', email: 'Email', mensaje: 'Message',
+        enviar: 'Send', exito: 'Thanks, your message was sent successfully.',
+        error: 'Something went wrong. Please try again.', volver: '<- Back',
+    }
+};
+const t = textos[lang];
+
 ---
+
+<html lang={lang}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{t.titulo} - Ana Baamonde</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --color-fondo: #f4f4f4;
+            --texto: #000;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--color-fondo);
+            font-family: 'Inter', sans-serif;
+            color: var(--texto);
+        }
+
+        .cabecera {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 80%, transparent 100%);
+        }
+
+        .idiomas a {
+            text-decoration: none;
+            color: #999;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        .idiomas a:hover { color: #000; }
+        .idiomas a.activo { color: #000; font-weight: bold; pointer-events: none; }
+
+        .contenedor-principal {
+            padding-top: 200px;
+            padding-left: 40px;
+            padding-right: 40px;
+            padding-bottom: 100px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
+            transition: color 0.3s;
+            border-bottom: 1px solid transparent;
+        }
+        .btn-volver:hover { color: #000; border-bottom: 1px solid #000; }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #666;
+        }
+
+        input, textarea {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 300;
+            border: none;
+            border-bottom: 1px solid #000;
+            background: transparent;
+            padding: 8px 0;
+            color: #000;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-bottom: 1px solid #666;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            align-self: flex-start;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 2px;
+            background: #000;
+            color: #f4f4f4;
+            border: none;
+            padding: 16px 40px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            margin-top: 20px;
+        }
+        button:hover { opacity: 0.7; }
+
+        .mensaje-estado {
+            margin-bottom: 40px;
+            padding: 20px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .mensaje-estado.exito { border-left: 2px solid #000; }
+        .mensaje-estado.error { border-left: 2px solid #999; color: #666; }
+    </style>
+    </head>
+    <body>
+        
+        <div class="cabecera">
+        <div><a href={`/${lang}/`} style="text-decoration:none; color:inherit;">@klluevabacardi</a></div>
+        <div class="idiomas">
+            <a href={linkES} class={lang === 'es' ? 'activo' : ''}>ES</a>
+            <span> | </span>
+            <a href={linkEN} class={lang === 'en' ? 'activo' : ''}>EN</a>
+        </div>
+    </div>
+
+
+    <main class="contenedor-principal">
+
+        <a href={`/${lang}/`} class="btn-volver">{t.volver}</a>
+
+        {sent && <div class="mensaje-estado exito">{t.exito}</div>}
+        {error && <div class="mensaje-estado error">{t.error}</div>}
+
+        <form method="POST">
+            <div class="campo">
+                <label for="nombre">{t.nombre}</label>
+                <input id="nombre" name="nombre" type="text" required />
+            </div>
+            <div class="campo">
+                <label for="email">{t.email}</label>
+                <input id="email" name="email" type="email" required />
+            </div>
+            <div class="campo">
+                <label for="mensaje">{t.mensaje}</label>
+                <textarea id="mensaje" name="mensaje" required></textarea>
+            </div>
+            <button type="submit">{t.enviar}</button>
+        </form>
+
+    </main>
+
+</body>
+</html>
+    </body>

@@ -9,8 +9,8 @@ if (lang !== 'es' && lang !== 'en') {
 }
 
 const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
-const registros = await pb.collection('analogica').getFullList({ sort: '-created' });
-const tituloVentana = lang === 'es' ? 'Analógica' : 'Analog';
+const registros = await pb.collection('digital').getFullList({ sort: '-created' });
+const tituloVentana = lang === 'es' ? 'Digital' : 'Digital';
 
 const currentPath = Astro.url.pathname;
 const linkES = currentPath.replace(`/${lang}`, '/es');
