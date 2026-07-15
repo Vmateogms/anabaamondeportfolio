@@ -3,6 +3,7 @@ import PocketBase from 'pocketbase';
 import Layout from '../../layouts/Layout.astro';
 
 const { lang } = Astro.params;
+const ALTURA_FILA = 350;
 
 if (lang !== 'es' && lang !== 'en') {
     return Astro.redirect('/es/');
@@ -15,6 +16,15 @@ const tituloVentana = lang === 'es' ? 'Analógica' : 'Analog';
 const currentPath = Astro.url.pathname;
 const linkES = currentPath.replace(`/${lang}`, '/es');
 const linkEN = currentPath.replace(`/${lang}`, '/en');
+
+function parseRatio(resolucion: string | undefined): number {
+    if(!resolucion) return 1;
+    const match = resolucion.match(/(\d+)\s*[x×]\s*(\d+)/i);
+    if (!match) return 1;
+    const [, ancho, alto] = match;
+    return parseInt(ancho) / parseInt(alto); 
+}
+
 ---
 
 <html lang={lang}>
@@ -48,7 +58,7 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             letter-spacing: 1px;
             font-size: 14px;
             box-sizing: border-box;
-            background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 80%, transparent 100%);
+            background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 80%);
         }
 
         .idiomas a {
@@ -91,19 +101,20 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
         }
 
         .galeria-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 100px;
-            align-items: start;
+            display: flex;
+            flex-wrap:  wrap;
+            gap: 10px;
+            /* grid-template-columns: repeat(3, 1fr);
+            
+            align-items: start; */
         }
 
         .foto-item {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+             height: 350px; /* mismo valor que ALTURA_FILA en el .astro */
+                margin: 0;
         }
-
-        .foto-item h2 {
+        /*Client Didnt want text */
+        /* .foto-item h2 {
             font-size: 1.5rem;
             font-weight: 400;
             margin: 0;
@@ -124,12 +135,12 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-
+        } */
+        .foto-item .imagen,
         .foto-item img {
             width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
+            height: 100%;
+            object-fit: cover; 
             display: block;
             transition: transform 0.3s ease;
         }
@@ -171,16 +182,17 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             {registros.map((registro) => {
                 const url = pb.files.getURL(registro, registro.foto);
                 const titulo = registro[`titulo_${lang}`];
-                const descripcion = registro[`descripcion_${lang}`];
-                const camara = registro.camara;
+                // const descripcion = registro[`descripcion_${lang}`]; //can be null
+                // const camara = registro.camara;
+                const ratio = parseRatio(registro.resolucion);
 
                 return (
-                    <article class="foto-item">
-                        <div class="texto">
+                    <article class="foto-item" style={`flex-grow: ${ratio}; flex-basis: ${ratio * ALTURA_FILA}px;`}>
+                     { /*  <div class="texto">
                             <h2>{titulo}</h2>
                             <div class="description" set:html={descripcion}></div>
                             <div class="camara" set:html={camara}></div>
-                        </div>
+                        </div> */}
                         <div class="imagen">
                             <img src={url} alt={titulo} />
                         </div>
