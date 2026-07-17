@@ -3,18 +3,31 @@ import PocketBase from 'pocketbase';
 import Layout from '../../layouts/Layout.astro';
 
 const { lang } = Astro.params;
+const ALTURA_FILA = 350;
 
 if (lang !== 'es' && lang !== 'en') {
     return Astro.redirect('/es/');
 }
 
 const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
-const registros = await pb.collection('analogica').getFullList({ sort: '-created' });
-const tituloVentana = lang === 'es' ? 'Analógica' : 'Analog';
+const registros = await pb.collection('proyectos').getFullList({ sort: '-created' });
+const tituloVentana = lang === 'es' ? 'Proyectos' : 'Projects';
 
 const currentPath = Astro.url.pathname;
 const linkES = currentPath.replace(`/${lang}`, '/es');
 const linkEN = currentPath.replace(`/${lang}`, '/en');
+
+function parseRatio(resolucion: string | undefined): number {
+    if(!resolucion) return 1;
+    const match = resolucion.match(/(\d+)\s*[x×]\s*(\d+)/i);
+    if (!match) return 1;
+    const [, ancho, alto] = match;
+    return parseInt(ancho) / parseInt(alto); 
+}
+
+
+
+
 ---
 
 <html lang={lang}>
@@ -25,18 +38,18 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
-        :root {
+         :root {
             --color-fondo: #f4f4f4;
             --texto: #000;
         }
-
+ 
         body {
             margin: 0;
             background-color: var(--color-fondo);
             font-family: 'Inter', sans-serif;
             color: var(--texto);
         }
-
+ 
         .cabecera {
             position: fixed;
             top: 0; left: 0; width: 100%;
@@ -48,9 +61,9 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             letter-spacing: 1px;
             font-size: 14px;
             box-sizing: border-box;
-            background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 80%, transparent 100%);
+            background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 80%);
         }
-
+ 
         .idiomas a {
             text-decoration: none;
             color: #999;
@@ -58,13 +71,13 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             cursor: pointer;
         }
         .idiomas a:hover { color: #000; }
-
+ 
         .idiomas a.activo {
             color: #000;
             font-weight: bold;
             pointer-events: none;
         }
-
+ 
         .contenedor-principal {
             padding-top: 150px;
             padding-left: 40px;
@@ -73,7 +86,7 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             max-width: 1300px;
             margin: 0 auto;
         }
-
+ 
         .btn-volver {
             display: inline-block;
             text-decoration: none;
@@ -89,28 +102,29 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             color: #000;
             border-bottom: 1px solid #000;
         }
-
+ 
         .galeria-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 100px;
-            align-items: start;
-        }
-
-        .foto-item {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            flex-wrap:  wrap;
+            gap: 10px;
+            /* grid-template-columns: repeat(3, 1fr);
+            
+            align-items: start; */
         }
-
-        .foto-item h2 {
+ 
+        .foto-item {
+             height: 350px; /* mismo valor que ALTURA_FILA en el .astro */
+                margin: 0;
+        }
+        /*Client Didnt want text */
+        /* .foto-item h2 {
             font-size: 1.5rem;
             font-weight: 400;
             margin: 0;
             text-transform: uppercase;
             line-height: 1.2;
         }
-
+ 
         .foto-item .description {
             font-size: 0.95rem;
             line-height: 1.6;
@@ -118,37 +132,139 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             font-weight: 300;
             margin: 0;
         }
-
+ 
         .foto-item .camara {
             font-size: 0.8rem;
             color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-
+        } */
+        .foto-item .imagen,
         .foto-item img {
             width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
+            height: 100%;
+            object-fit: cover; 
             display: block;
             transition: transform 0.3s ease;
         }
-
+ 
         .foto-item img:hover {
             transform: scale(1.02);
         }
-
+ 
+        .foto-item img {
+            cursor: zoom-in;
+        }
+ 
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.94);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+ 
+        .lightbox.activo {
+            display:flex;
+        }
+ 
+        .lightbox img {
+            max-width: 92vw;
+            max-height: 92vh;
+            object-fit: contain;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none;
+            will-change: transform;
+        }
+ 
+        .lightbox img.arrastrando {
+            cursor: grabbing;
+        }
+ 
+        .lightbox-cerrar {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            z-index: 1001;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .lightbox-cerrar:hover {
+            opacity: 1;
+        }
+ 
+        .lightbox-nav {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            z-index: 1001;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .lightbox-nav:hover {
+            opacity: 1;
+        }
+        .lightbox-anterior { left: 20px; }
+        .lightbox-siguiente { right: 20px; }
+ 
+        .lightbox-ayuda {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            z-index: 1001;
+            pointer-events: none;
+        }
+ 
         @media (max-width: 1024px) {
             .galeria-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 40px;
             }
         }
-
+ 
         @media (max-width: 600px) {
             .galeria-grid {
                 grid-template-columns: 1fr;
             }
+            .lightbox-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
+            }
+            .lightbox-anterior { left: 5px; }
+            .lightbox-siguiente { right: 5px; }
         }
     </style>
 </head>
@@ -168,28 +284,240 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
         <a href={`/${lang}/`} class="btn-volver">{lang === 'es' ? '← Volver' : '← Back'}</a>
 
         <div class="galeria-grid">
-            {registros.map((registro) => {
+            {registros.length === 0 ? (
+                <p class="mensaje-vacio">
+                    {lang == 'es' ? 'Estamos trabajando en esto.' : "We're working on this."}
+                </p>
+            ):(registros.map((registro) => {
                 const url = pb.files.getURL(registro, registro.foto);
                 const titulo = registro[`titulo_${lang}`];
-                const descripcion = registro[`descripcion_${lang}`];
-                const camara = registro.camara;
+                // const descripcion = registro[`descripcion_${lang}`]; //can be null
+                // const camara = registro.camara;
+                const ratio = parseRatio(registro.resolucion);
 
                 return (
-                    <article class="foto-item">
-                        <div class="texto">
+                    <article class="foto-item" style={`flex-grow: ${ratio}; flex-basis: ${ratio * ALTURA_FILA}px;`}>
+                     { /*  <div class="texto">
                             <h2>{titulo}</h2>
                             <div class="description" set:html={descripcion}></div>
                             <div class="camara" set:html={camara}></div>
-                        </div>
+                        </div> */}
                         <div class="imagen">
-                            <img src={url} alt={titulo} />
+                            <img src={url} alt={titulo} data-lightbox="true"/>
                         </div>
                     </article>
                 );
-            })}
+            })
+        )}
         </div>
 
     </main>
 
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-cerrar" id="lightboxCerrar" aria-label="Cerrar">X</button>
+        <button class="lightbox-nav lightbox-anterior" id="lightboxAnterior" aria-label={lang === 'es' ? 'Anterior' : 'Previous'}>‹</button>
+        <img id="lightboxImg" src="" alt="" />
+        <button class="lightbox-nav lightbox-siguiente" id="lightboxSiguiente" aria-label={lang === 'es' ? 'Siguiente' : 'Next'}>›</button>
+    </div>
+    <script>
+        const lightbox = document.getElementById('lightbox') as HTMLDivElement;
+        const lightboxImg = document.getElementById('lightboxImg') as HTMLImageElement;
+        const btnCerrar = document.getElementById('lightboxCerrar') as HTMLButtonElement;
+        const btnAnterior = document.getElementById('lightboxAnterior') as HTMLButtonElement;
+        const btnSiguiente = document.getElementById('lightboxSiguiente') as HTMLButtonElement;
+
+        const fotos: { src: string, alt: string}[] = [];
+        let currentIndex = 0;
+
+        let escala = 1;
+        let posX = 0;
+        let posY = 0;
+        let arrastrando = false;
+        let inicioX = 0;
+        let inicioY = 0;
+
+        // Para el zoom y el swipe en movil
+        let distanciaInicial = 0;
+        let escalaInicial = 1;
+        let ultimoTap = 0;
+        let inicioToqueX = 0;
+        let inicioToqueY = 0;
+        let esPellizco = false;
+        
+        function actualizarTransform(){
+            lightboxImg.style.transform = `translate(${posX}px, ${posY}px) scale(${escala})`;
+        }
+
+        function defautlScale() {
+            escala = 1;
+            posX = 0;
+            posY = 0;
+        }
+
+        function resetZoom(){
+            escala = 1;
+            posX = 0;
+            posY = 0;
+            actualizarTransform();
+        }
+
+        function abrirLightbox(indice: number) {
+            currentIndex = indice;
+            changePhoto();
+            lightbox.classList.add('activo');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function changePhoto(){
+            const foto = fotos[currentIndex]
+            lightboxImg.src = foto.src;
+            lightboxImg.alt = foto.alt;
+            resetZoom();
+        }
+
+        function showNext() {
+            currentIndex = (currentIndex + 1) % fotos.length;
+            changePhoto();
+        }
+
+        function showBefore() {
+            currentIndex = (currentIndex - 1 + fotos.length) % fotos.length;
+            changePhoto();
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('activo');
+            document.body.style.overflow = '';
+            lightboxImg.src = '';
+        }
+
+        function distanceBetweenFingers(touches: TouchList) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        document.querySelectorAll<HTMLImageElement>('[data-lightbox]').forEach((img, indice) => {
+            fotos.push({ src: img.src, alt: img.alt});
+            img.addEventListener('click', () => abrirLightbox(indice));
+        })
+
+        if (fotos.length <= 1 ){
+            btnAnterior.style.display = 'none';
+            btnSiguiente.style.display = 'none';
+        }
+
+        btnCerrar.addEventListener('click', closeLightbox);
+        btnAnterior.addEventListener('click', (e) => { e.stopPropagation(); showBefore();});
+        btnSiguiente.addEventListener('click', (e) => { e.stopPropagation(); showNext();});
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if(!lightbox.classList.contains('activo')) return;
+            if(e.key === 'Escape') closeLightbox();
+            if(e.key === 'ArrowRight') showNext();
+            if(e.key === 'ArrowLeft') showBefore();
+        });
+
+        lightboxImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.2 : 0.2;
+            escala = Math.min(Math.max(1,escala + delta), 5);
+            if (escala === 1) { posX = 0; posY = 0;}
+            actualizarTransform();
+        })
+
+        lightboxImg.addEventListener('dblclick', () => {
+            if (escala === 1) {
+                escala = 2.5;
+            } else {
+                defautlScale();
+            }
+            actualizarTransform();
+        })
+
+        lightboxImg.addEventListener('mousedown', (e) => {
+            if(escala === 1) return;
+            arrastrando = true;
+            lightboxImg.classList.add('arrastrando');
+            inicioX = e.clientX - posX;
+            inicioY = e.clientY - posY;
+        })
+
+        window.addEventListener('mousemove', (e) => {
+            if (!arrastrando) return;
+            posX = e.clientX - inicioX;
+            posY = e.clientY - inicioY;
+            actualizarTransform();
+        })
+
+        window.addEventListener('mouseup', ()=> {
+            arrastrando = false;
+            lightboxImg.classList.remove('arrastrando');
+        })
+
+        lightboxImg.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                esPellizco = true;
+                distanciaInicial = distanceBetweenFingers(e.touches);
+                escalaInicial = escala;
+            } else if (e.touches.length === 1) {
+                esPellizco = false;
+                inicioToqueX = e.touches[0].clientX;
+                inicioToqueY = e.touches[0].clientY;
+                if (escala > 1) {
+                    arrastrando = true;
+                    inicioX = e.touches[0].clientX - posX;
+                    inicioY = e.touches[0].clientY - posY;
+                }
+            }
+        });
+
+        lightbox.addEventListener('touchmove', (e)=> {
+            if(e.touches.length === 2) {
+                e.preventDefault();
+                const distanciaActual = distanceBetweenFingers(e.touches);
+                escala = Math.min(Math.max(1, escalaInicial * (distanciaActual / distanciaInicial)), 5);
+                actualizarTransform();
+            }else if(e.touches.length === 1 && arrastrando) {
+                posX = e.touches[0].clientX - inicioX;
+                posY = e.touches[0].clientY - inicioY;
+                actualizarTransform();
+            }
+        });
+
+        lightboxImg.addEventListener('touchend', (e) => {
+            arrastrando = false;
+            if (esPellizco) { esPellizco = false; return; }
+ 
+            const toque = e.changedTouches[0];
+            const deltaX = toque.clientX - inicioToqueX;
+            const deltaY = toque.clientY - inicioToqueY;
+ 
+            // Deslizar hacia los lados cambia de foto (solo si no hay zoom aplicado)
+            if (escala === 1 && Math.abs(deltaX) > 60 && Math.abs(deltaY) < 60) {
+                deltaX > 0 ? showBefore() : showNext();
+                return;
+            }
+ 
+            // Doble tap para alternar zoom rápido
+            const ahora = Date.now();
+            if (ahora - ultimoTap < 300) {
+                if (escala === 1) {
+                    escala = 2.5;
+                } else {
+                    escala = 1;
+                    posX = 0;
+                    posY = 0;
+                }
+                actualizarTransform();
+            }
+            ultimoTap = ahora;
+        });
+
+    </script>
 </body>
 </html>
