@@ -47,6 +47,7 @@ Crea un archivo ` .env` en la raiz del proyecto
 
 ```
 PUBLIC_POCKETBASE_URL=https://tupocketbase.com
+KLLUEVABACARDI_URL=https://www.instagram.com/@yourinstagram/
 ```
 
 ### 🚀 Desarrollo local
@@ -98,6 +99,7 @@ Create a `.env` file in the project root:
  
 ```
 PUBLIC_POCKETBASE_URL=https://yourpocketbase.com
+INSTAGRAM_URL=https://www.instagram.com/@yourinstagram/
 ```
  
 ### 🚀 Local development
@@ -153,6 +155,7 @@ Erstelle eine `.env`-Datei im Stammverzeichnis des Projekts
 
 ```
 PUBLIC_POCKETBASE_URL=https://tupocketbase.com
+INSTAGRAM_URL=https://www.instagram.com/@yourinstagram/
 ```
 
 ### 🚀 Lokale Entwicklung
