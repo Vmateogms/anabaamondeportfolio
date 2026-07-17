@@ -10,8 +10,10 @@ const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
 const info = await pb.collection('sobre_mi').getFirstListItem('id != ""');
 const urlFoto = pb.files.getURL(info, info.foto);
 
+
 const titulo = info[`titulo_${lang}`];
 const bio = info[`bio_${lang}`];
+const anchoFoto = info.ancho_foto || 100;
 
 const currentPath = Astro.url.pathname;
 const linkES = currentPath.replace(`/${lang}`, '/es');
@@ -120,9 +122,9 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
         }
 
         .imagen-wrapper img {
-            width: 100%;
             height: auto;
             display: block;
+            margin-inline:auto;
         }
 
         @media (max-width: 768px) {
@@ -164,7 +166,7 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             </div>
 
             <div class="imagen-wrapper">
-                <img src={urlFoto} alt={titulo} />
+                <img src={urlFoto} alt={titulo}  style={`width: ${anchoFoto}%`}/>
             </div>
 
         </div>
