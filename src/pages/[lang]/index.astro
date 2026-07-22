@@ -1,22 +1,29 @@
 ---
-
+import PocketBase from 'pocketbase';
 import { getRelativeLocaleUrl } from 'astro:i18n';
+import { encode } from 'astro:schema';
 
 const {lang} = Astro.params;
 const currentPath = Astro.url.pathname;
 
-
+const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
 const pathEmpty = currentPath.replace(`/${lang}`, '') ||'/';
+const registros = await pb.collection('index').getFullList({ sort: '+order' });
 const linkES = getRelativeLocaleUrl('es', pathEmpty);
 const linkEN = getRelativeLocaleUrl('en', pathEmpty);
 
-const elementosMenu = [
-    { titulo: lang === 'es' ? "SOBRE MÍ" : "ABOUT ME", href: `/${lang}/sobre-mi` },
-    { titulo: lang === 'es' ? "FOTOGRAFÍA ANALÓGICA" : "ANALOG PHOTO", href: `/${lang}/analogica` },
-    { titulo: lang === 'es' ? "FOTOGRAFÍA DIGITAL" : "DIGITAL PHOTO", href: `/${lang}/digital` },
-    { titulo: lang === 'es' ? "PROYECTOS" : "PROJECTS", href: `/${lang}/proyectos` },
-    { titulo: lang === 'es' ? "CONTACTO" : "CONTACT", href: `/${lang}/contacto` },
-];
+// const elementosMenu = [
+//     { titulo: lang === 'es' ? "SOBRE MÍ" : "ABOUT ME", href: `/${lang}/sobre-mi` },
+//     { titulo: lang === 'es' ? "FOTOGRAFÍA ANALÓGICA" : "ANALOGUE PHOTOGRAPHY", href: `/${lang}/analogica` },
+//     { titulo: lang === 'es' ? "FOTOGRAFÍA DIGITAL" : "DIGITAL PHOTOGRAPHY", href: `/${lang}/digital` },
+//     { titulo: lang === 'es' ? "PROYECTOS" : "PROJECTS", href: `/${lang}/proyectos` },
+//     { titulo: lang === 'es' ? "CONTACTO" : "CONTACT", href: `/${lang}/contacto` },
+// ];
+
+const elementosMenu = registros.map((registro) =>  ({
+   titulo: lang === 'es' ? registro.titulo_es : registro.title_en , href: `/${lang}/${registro.slug_es}`,
+}));
+
 ---
 
 <html lang={lang}>
