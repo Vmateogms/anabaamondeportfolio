@@ -12,6 +12,7 @@ const registros = await pb.collection('index').getFullList({ sort: '+order' });
 const linkES = getRelativeLocaleUrl('es', pathEmpty);
 const linkEN = getRelativeLocaleUrl('en', pathEmpty);
 
+//hardcoded menu items
 // const elementosMenu = [
 //     { titulo: lang === 'es' ? "SOBRE MÍ" : "ABOUT ME", href: `/${lang}/sobre-mi` },
 //     { titulo: lang === 'es' ? "FOTOGRAFÍA ANALÓGICA" : "ANALOGUE PHOTOGRAPHY", href: `/${lang}/analogica` },
@@ -20,6 +21,7 @@ const linkEN = getRelativeLocaleUrl('en', pathEmpty);
 //     { titulo: lang === 'es' ? "CONTACTO" : "CONTACT", href: `/${lang}/contacto` },
 // ];
 
+//dynamic menu items from PocketBase
 const elementosMenu = registros.map((registro) =>  ({
    titulo: lang === 'es' ? registro.titulo_es : registro.title_en , href: `/${lang}/${registro.slug_es}`,
 }));
