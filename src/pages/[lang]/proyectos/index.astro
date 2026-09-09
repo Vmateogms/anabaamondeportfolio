@@ -10,7 +10,7 @@ if (lang !== 'es' && lang !== 'en') {
 }
 
 const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
-const registros = await pb.collection('proyectos').getFullList({ sort: '-created' });
+const registros = await pb.collection('proyectos').getFullList({ sort: '+orden, -created' });
 const tituloVentana = lang === 'es' ? 'Proyectos' : 'Projects';
 
 const currentPath = Astro.url.pathname;

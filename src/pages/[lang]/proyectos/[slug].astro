@@ -178,11 +178,16 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             object-fit: cover;
             display: block;
             cursor: zoom-in;
-            transition: transform 0.3s ease;
+            /* transition: transform 0.3s ease; */
         }
-        .galeria-proyecto img:hover {
+
+        .galeria-proyecto .foto-item.destacada img {
+    object-fit: contain;
+    background-color: var(--color-fondo);
+}
+        /* .galeria-proyecto img:hover {
             transform: scale(1.02);
-        }
+        } */
 
         /* --- Cuerpo libre (editor enriquecido de PocketBase) --- */
         .cuerpo-proyecto {
