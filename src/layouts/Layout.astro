@@ -1,35 +1,248 @@
 ---
-// src/layouts/Layout.astro
-const { title } = Astro.props;
+// src/pages/[lang]/proyectos/index.astro
+import PocketBase from 'pocketbase';
+
+const { lang } = Astro.params;
+const ALTURA_FILA = 350;
+
+if (lang !== 'es' && lang !== 'en') {
+    return Astro.redirect('/es/');
+}
+
+const pb = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
+const registros = await pb.collection('proyectos').getFullList({ sort: '+orden, -created' });
+const tituloVentana = lang === 'es' ? 'Proyectos' : 'Projects';
+
+const currentPath = Astro.url.pathname;
+const linkES = currentPath.replace(`/${lang}`, '/es');
+const linkEN = currentPath.replace(`/${lang}`, '/en');
+
+function parseRatio(resolucion: string | undefined): number {
+    if (!resolucion) return 1;
+    const match = resolucion.match(/(\d+)\s*[x×]\s*(\d+)/i);
+    if (!match) return 1;
+    const [, ancho, alto] = match;
+    return parseInt(ancho) / parseInt(alto);
+}
 ---
 
-<!DOCTYPE html>
-<html lang="es">
+<html lang={lang}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
-    <style is:global>
-        /* Aquí tus estilos globales */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap');
+    <title>{tituloVentana} - Ana Baamonde</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
         :root {
             --color-fondo: #f4f4f4;
+            --texto: #000;
         }
 
         body {
             margin: 0;
             background-color: var(--color-fondo);
             font-family: 'Inter', sans-serif;
-            color: #000;
+            color: var(--texto);
         }
-        
-        /* Estilos para textos, etc. */
-        h1 { font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        p { font-weight: 300; line-height: 1.6; }
+
+        .cabecera {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 80%);
+        }
+
+        .idiomas a {
+            text-decoration: none;
+            color: #999;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        .idiomas a:hover { color: #000; }
+
+        .idiomas a.activo {
+            color: #000;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .contenedor-principal {
+            padding-top: 150px;
+            padding-left: 40px;
+            padding-right: 40px;
+            padding-bottom: 80px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            text-decoration: none;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
+            transition: color 0.3s;
+            border-bottom: 1px solid transparent;
+        }
+        .btn-volver:hover {
+            color: #000;
+            border-bottom: 1px solid #000;
+        }
+
+        .galeria-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* cada proyecto: foto + pie con titulo/año, todo dentro del <a> */
+        .enlace-proyecto {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            height: 350px; /* mismo valor que ALTURA_FILA */
+            position: relative;
+        }
+
+        .foto-item {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease, filter 0.4s ease;
+        }
+
+        .enlace-proyecto:hover .foto-item img {
+            transform: scale(1.03);
+        }
+
+        /* pie de titulo + año, aparece con overlay al hacer hover (desktop)
+           y siempre visible en movil */
+        .pie-proyecto {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 6px;
+            padding: 20px;
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .enlace-proyecto:hover .pie-proyecto {
+            opacity: 1;
+        }
+
+        .pie-proyecto h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #fff;
+            text-transform: none;
+            line-height: 1.3;
+        }
+
+        .pie-proyecto .anio {
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .mensaje-vacio {
+            color: #666;
+            font-weight: 300;
+        }
+
+        @media (max-width: 1024px) {
+            .galeria-grid {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .galeria-grid {
+                flex-direction: column;
+            }
+            .enlace-proyecto {
+                flex-basis: auto !important;
+                width: 100%;
+            }
+            /* en movil no hay hover, dejamos el pie siempre visible */
+            .pie-proyecto {
+                opacity: 1;
+                background: rgba(0, 0, 0, 0.25);
+            }
+        }
     </style>
 </head>
 <body>
-    <slot />
+
+    <div class="cabecera">
+        <div><a href={`/${lang}/`} style="text-decoration:none; color:inherit;">@klluevabacardi</a></div>
+        <div class="idiomas">
+            <a href={linkES} class={lang === 'es' ? 'activo' : ''}>ES</a>
+            <span> | </span>
+            <a href={linkEN} class={lang === 'en' ? 'activo' : ''}>EN</a>
+        </div>
+    </div>
+
+    <main class="contenedor-principal">
+
+        <a href={`/${lang}/`} class="btn-volver">{lang === 'es' ? '← Volver' : '← Back'}</a>
+
+        <div class="galeria-grid">
+            {registros.length === 0 ? (
+                <p class="mensaje-vacio">
+                    {lang == 'es' ? 'Estamos trabajando en esto.' : "We're working on this."}
+                </p>
+            ) : (registros.map((registro) => {
+                const url = pb.files.getURL(registro, registro.foto);
+                const titulo = registro[`titulo_${lang}`];
+                const ratio = parseRatio(registro.resolucion);
+                // fallback a id por si un proyecto aun no tiene slug asignado
+                const destino = registro.slug || registro.id;
+
+                return (
+                    <a
+                        href={`/${lang}/proyectos/${destino}`}
+                        class="enlace-proyecto"
+                        style={`flex-grow: ${ratio}; flex-basis: ${ratio * ALTURA_FILA}px;`}
+                    >
+                        <div class="foto-item">
+                            <img src={url} alt={titulo} />
+                        </div>
+                        <div class="pie-proyecto">
+                            <h2>{titulo}</h2>
+                            {registro.anio && <span class="anio">{registro.anio}</span>}
+                        </div>
+                    </a>
+                );
+            }))}
+        </div>
+
+    </main>
+
 </body>
 </html>

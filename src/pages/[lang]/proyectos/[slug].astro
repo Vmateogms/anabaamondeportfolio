@@ -1,9 +1,10 @@
 ---
 // src/pages/[lang]/proyectos/[slug].astro
 import PocketBase from 'pocketbase';
+import Bloques from './bloques.astro';
+
 
 const { lang, slug } = Astro.params;
-const ALTURA_FILA = 350;
 
 if (lang !== 'es' && lang !== 'en') {
     return Astro.redirect('/es/');
@@ -28,13 +29,36 @@ try {
 const titulo = proyecto[`titulo_${lang}`];
 const descripcion = proyecto[`descripcion_${lang}`]; // subtitulo corto, texto plano
 const roles = proyecto[`roles_${lang}`]; // "Boom Operator · Direct Sound · Electric Dept"
-const cuerpo = proyecto[`cuerpo_${lang}`]; // HTML enriquecido (editor de PocketBase)
 const anio = proyecto.anio;
 
-// campo "galeria" en PocketBase: archivo multiple (varias fotos del rodaje/proyecto)
-const galeria: string[] = (proyecto.galeria || []).map((archivo: string) =>
-    pb.files.getURL(proyecto, archivo)
-);
+function youtubeId(url?: string): string | null {
+    if (!url) return null;
+    try {
+        const u = new URL(url);
+        if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+        if (u.hostname.endsWith('youtube.com')) return u.searchParams.get('v');
+    } catch {}
+    return null;
+}
+
+const bloquesRaw = await pb.collection('bloques').getFullList({
+    filter: pb.filter('proyecto = {:id}', { id: proyecto.id }),
+    sort: 'orden',
+});
+
+const bloques = bloquesRaw.map((b) => ({
+    tipo: b.tipo,
+    alineacion: b.alineacion,
+    disposicion: b.disposicion,
+    lado: b.lado,
+    altura: b.altura,
+    enlace_url: b.enlace_url,
+    texto: b[`texto_${lang}`],
+    etiqueta: b[`etiqueta_${lang}`],
+    urls: (b.imagenes || []).map((f: string) => pb.files.getURL(b, f)),
+    urlArchivo: b.archivo ? pb.files.getURL(b, b.archivo) : null,
+    videoId: b.tipo === 'video' ? youtubeId(b.video_url) : null,
+}));
 
 const currentPath = Astro.url.pathname;
 const linkES = currentPath.replace(`/${lang}`, '/es');
@@ -152,78 +176,6 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             font-weight: 600;
         }
 
-        /* --- Galeria del proyecto (grid simple, sin masonry) --- */
-        .galeria-proyecto {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 60px 0;
-        }
-
-        .galeria-proyecto .foto-item {
-            aspect-ratio: 4 / 3;
-            overflow: hidden;
-            margin: 0;
-        }
-
-        /* la primera foto de la galeria a ancho completo, tipo "hero" del proyecto */
-        .galeria-proyecto .foto-item.destacada {
-            grid-column: 1 / -1;
-            aspect-ratio: 16 / 9;
-        }
-
-        .galeria-proyecto img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            cursor: zoom-in;
-            /* transition: transform 0.3s ease; */
-        }
-
-        .galeria-proyecto .foto-item.destacada img {
-    object-fit: contain;
-    background-color: var(--color-fondo);
-}
-        /* .galeria-proyecto img:hover {
-            transform: scale(1.02);
-        } */
-
-        /* --- Cuerpo libre (editor enriquecido de PocketBase) --- */
-        .cuerpo-proyecto {
-            font-size: 0.95rem;
-            line-height: 1.7;
-            font-weight: 300;
-            color: #333;
-        }
-
-        .cuerpo-proyecto :global(p) {
-            margin: 0 0 1.4rem 0;
-        }
-
-        .cuerpo-proyecto :global(h2),
-        .cuerpo-proyecto :global(h3) {
-            text-align: center;
-            font-weight: 600;
-            color: #666;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            margin: 3rem 0 1rem 0;
-        }
-
-        .cuerpo-proyecto :global(img) {
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: 2.5rem 0;
-        }
-
-        @media (max-width: 900px) {
-            .galeria-proyecto {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
         @media (max-width: 600px) {
             .contenedor-principal {
                 padding-top: 100px;
@@ -231,12 +183,6 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
                 padding-right: 20px;
             }
             .cabecera-proyecto h1 { font-size: 1.6rem; }
-            .galeria-proyecto {
-                grid-template-columns: 1fr;
-            }
-            .galeria-proyecto .foto-item.destacada {
-                aspect-ratio: 4 / 3;
-            }
         }
 
         /* --- Lightbox (reutilizado de la galeria general) --- */
@@ -321,17 +267,7 @@ const linkEN = currentPath.replace(`/${lang}`, '/en');
             {roles && <p class="roles-proyecto">{roles}</p>}
         </header>
 
-        {galeria.length > 0 && (
-            <div class="galeria-proyecto">
-                {galeria.map((url, indice) => (
-                    <div class={`foto-item ${indice === 0 ? 'destacada' : ''}`}>
-                        <img src={url} alt={titulo} data-lightbox="true" />
-                    </div>
-                ))}
-            </div>
-        )}
-
-        {cuerpo && <div class="cuerpo-proyecto" set:html={cuerpo} />}
+        {bloques.length > 0 && <Bloques bloques={bloques} titulo={titulo} />}
 
     </main>
 
