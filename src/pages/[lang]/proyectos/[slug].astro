@@ -58,6 +58,7 @@ const bloques = bloquesRaw.map((b) => ({
     urls: (b.imagenes || []).map((f: string) => pb.files.getURL(b, f)),
     urlArchivo: b.archivo ? pb.files.getURL(b, b.archivo) : null,
     videoId: b.tipo === 'video' ? youtubeId(b.video_url) : null,
+    urlVideo: b.tipo === 'video' && b.video_file ? pb.files.getURL(b, b.video_file) : null
 }));
 
 const currentPath = Astro.url.pathname;
