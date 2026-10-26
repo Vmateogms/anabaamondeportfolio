@@ -1,5 +1,4 @@
 ---
-
 import PocketBase from 'pocketbase';
 const {lang} = Astro.params;
 if (lang !== 'es' && lang !== 'en') {
@@ -34,12 +33,14 @@ const textos = {
     es: {
         titulo: 'Contacto', nombre: 'Nombre', email: 'Email', mensaje: 'Mensaje',
         enviar: 'Enviar', exito: 'Gracias, tu mensaje se ha enviado correctamente.',
-        error: 'Algo salió mal. Inténtalo de nuevo.', volver: '<- Volver',
+        error: 'Algo salió mal. Inténtalo de nuevo.', volver: '← Volver',
+        seguir: '¡sígueme!!',
     },
     en: {
         titulo: 'Contact', nombre: 'Name', email: 'Email', mensaje: 'Message',
         enviar: 'Send', exito: 'Thanks, your message was sent successfully.',
-        error: 'Something went wrong. Please try again.', volver: '<- Back',
+        error: 'Something went wrong. Please try again.', volver: '← Back',
+        seguir: 'follow me!!',
     }
 };
 const t = textos[lang];
@@ -177,11 +178,32 @@ const t = textos[lang];
         }
         .mensaje-estado.exito { border-left: 2px solid #000; }
         .mensaje-estado.error { border-left: 2px solid #999; color: #666; }
+
+        /* --- Foto de Ana: pequeña, a la derecha, debajo del botón --- */
+        .foto-contacto {
+            width: 220px;                 /* cambia este número para hacerla más grande o más pequeña */
+            margin: 100px 0 0 auto;
+        }
+        .foto-contacto img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .foto-contacto figcaption {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 300;
+            color: #888;
+        }
+        @media (max-width: 600px) {
+            .foto-contacto { margin: 60px auto 0; }
+        }
     </style>
-    </head>
-    <body>
-        
-        <div class="cabecera">
+</head>
+<body>
+
+    <div class="cabecera">
         <div><a href={`/${lang}/`} style="text-decoration:none; color:inherit;">@klluevabacardi</a></div>
         <div class="idiomas">
             <a href={linkES} class={lang === 'es' ? 'activo' : ''}>ES</a>
@@ -189,7 +211,6 @@ const t = textos[lang];
             <a href={linkEN} class={lang === 'en' ? 'activo' : ''}>EN</a>
         </div>
     </div>
-
 
     <main class="contenedor-principal">
 
@@ -214,12 +235,12 @@ const t = textos[lang];
             <button type="submit">{t.enviar}</button>
         </form>
 
-        <div>
-            <img src="/public/fotoana.png" alt="Ana Baamonde" id="foto-ana"/>
-        </div>
+        <figure class="foto-contacto">
+            <img src="/fotoana.png" alt="Ana Baamonde" id="foto-ana" />
+            <figcaption>{t.seguir} @klluevabacardi</figcaption>
+        </figure>
 
     </main>
 
 </body>
 </html>
-    </body>
