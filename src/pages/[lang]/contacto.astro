@@ -34,7 +34,7 @@ const textos = {
         titulo: 'Contacto', nombre: 'Nombre', email: 'Email', mensaje: 'Mensaje',
         enviar: 'Enviar', exito: 'Gracias, tu mensaje se ha enviado correctamente.',
         error: 'Algo salió mal. Inténtalo de nuevo.', volver: '← Volver',
-        seguir: '¡sígueme!!',
+        seguir: 'sígueme!!',
     },
     en: {
         titulo: 'Contact', nombre: 'Name', email: 'Email', mensaje: 'Message',
@@ -44,6 +44,11 @@ const textos = {
     }
 };
 const t = textos[lang];
+const redes = {
+    instagram: 'https://instagram.com/klluevabacardi',  
+    linkedin: 'https://www.linkedin.com/in/ana-baamonde-p%C3%A9rez-411611292/', 
+};
+
 
 ---
 
@@ -182,7 +187,7 @@ const t = textos[lang];
         /* --- Foto de Ana: pequeña, a la derecha, debajo del botón --- */
         .foto-contacto {
             width: 220px;                 /* cambia este número para hacerla más grande o más pequeña */
-            margin: 100px 0 0 auto;
+            margin: 60px 0 0 auto;
         }
         .foto-contacto img {
             display: block;
@@ -196,6 +201,33 @@ const t = textos[lang];
             font-weight: 300;
             color: #888;
         }
+
+        .foto-contacto { margin: 60px 0 0 auto; }
+
+.enlace-foto { display: block; transition: opacity 0.3s; }
+.enlace-foto:hover { opacity: 0.8; }
+
+.foto-contacto figcaption a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid #bbb;
+    transition: color 0.3s, border-color 0.3s;
+}
+.foto-contacto figcaption a:hover { color: #000; border-bottom-color: #000; }
+
+.enlace-foto:focus-visible,
+.foto-contacto figcaption a:focus-visible,
+.red-social:focus-visible { outline: 2px solid #000; outline-offset: 3px; }
+.redes { display: flex; gap: 16px; margin-top: 80px; }
+.red-social {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #e9e9e9; color: #000;
+    transition: background 0.3s, color 0.3s;
+}
+.red-social:hover { background: #000; color: #f4f4f4; }
+.red-social svg { width: 20px; height: 20px; }
+
         @media (max-width: 600px) {
             .foto-contacto { margin: 60px auto 0; }
         }
@@ -235,10 +267,34 @@ const t = textos[lang];
             <button type="submit">{t.enviar}</button>
         </form>
 
+        <div class="redes">
+    
+    <a class="red-social" href={redes.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+            <rect x="2" y="9" width="4" height="12"></rect>
+            <circle cx="4" cy="4" r="2"></circle>
+        </svg>
+    </a>
+    <a class="red-social" href={redes.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+    </a>
+</div>
+
+
         <figure class="foto-contacto">
-            <img src="/fotoana.png" alt="Ana Baamonde" id="foto-ana" />
-            <figcaption>{t.seguir} @klluevabacardi</figcaption>
-        </figure>
+    <a class="enlace-foto" href={redes.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram @klluevabacardi">
+        <img src="/fotoana.png" alt="Ana Baamonde" id="foto-ana" />
+    </a>
+    <figcaption>
+        {t.seguir}
+        <a href={redes.instagram} target="_blank" rel="noopener noreferrer">@klluevabacardi</a>
+    </figcaption>
+</figure>
 
     </main>
 

@@ -15,7 +15,7 @@ const titulo = info[`titulo_${lang}`];
 const bio = info[`bio_${lang}`];
 const anchoFoto = info.ancho_foto || 100;
 
-const urlCv = info.cv ? pb.files.getURL(info, info.cv) : null;
+const urlCv = info.cv ? pb.files.getURL(info, info.cv, { download: true }) : null;
 
 const currentPath = Astro.url.pathname;
 const linkES = currentPath.replace(`/${lang}`, '/es');
